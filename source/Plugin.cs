@@ -9,7 +9,7 @@ using Nethermind.Logging;
 
 namespace Zoltu.Nethermind.Plugin.Multicall
 {
-	public sealed class Plugin : DisposeSyncOnce, INethermindPlugin
+	public sealed class Plugin : DisposeAsyncOnce, INethermindPlugin
 	{
 		public String Name => "Multicall";
 		public String Description => "Adds support for calling multiple transactions in sequence against shared state.";
@@ -36,13 +36,14 @@ namespace Zoltu.Nethermind.Plugin.Multicall
 			var jsonRpcConfig = _nethermindApi.Config<IJsonRpcConfig>() ?? throw new Exception($"JsonRpc configuration not found.");
 			var blockProcessor = _nethermindApi.MainBlockProcessor ?? throw new Exception($"api.MainBlockProcessor is null.");
 			var blockTree = _nethermindApi.BlockTree?.AsReadOnly() ?? throw new Exception($"api.BlockTree is null.");
+			var rpcModuleProvider = _nethermindApi.RpcModuleProvider ?? throw new Exception($"api.RpcModuleProvider is null.");
 
 			try
 			{
 				if (_config.Enabled == false) throw new Exception($"{Name}.Enabled configuration variables set to false, halting initialization of {Name} plugin.");
 				_logger.Info($"{Name} Plugin enabled, initializing...");
 				var multiCallModuleFactory = new MulticallModuleFactory(blockProcessor, blockTree, jsonRpcConfig);
-				_nethermindApi.RpcModuleProvider.Register(new BoundedModulePool<IMulticallModule>(multiCallModuleFactory, _cpuCount, jsonRpcConfig.Timeout));
+				rpcModuleProvider.Register(new BoundedModulePool<IMulticallModule>(multiCallModuleFactory, _cpuCount, jsonRpcConfig.Timeout));
 				await Task.CompletedTask;
 			}
 			catch (Exception exception)
@@ -51,6 +52,6 @@ namespace Zoltu.Nethermind.Plugin.Multicall
 			}
 		}
 
-		protected override void DisposeOnce() { }
+		protected override async ValueTask DisposeOnce() => await ValueTask.CompletedTask;
 	}
 }

@@ -28,7 +28,7 @@ namespace Zoltu.Nethermind.Plugin.Multicall
 		}
 		public ResultWrapper<CallResult[]> eth_multicall(TransactionForRpc[] transactions)
 		{
-			var blockHeader = new BlockHeader(blockTree.Head.Hash!, Keccak.EmptyTreeHash, Address.Zero, blockTree.Head.Difficulty, blockTree.Head.Number + 1, blockTree.Head.GasLimit, blockTree.Head.Timestamp + 1, Array.Empty<Byte>());
+			var blockHeader = new BlockHeader(blockTree.Head!.Hash!, Keccak.EmptyTreeHash, Address.Zero, blockTree.Head.Difficulty, blockTree.Head.Number + 1, blockTree.Head.GasLimit, blockTree.Head.Timestamp + 1, Array.Empty<Byte>());
 			var block = new Block(blockHeader, transactions.Select(x => x.ToTransaction()), Enumerable.Empty<BlockHeader>());
 			var cancellationToken = new CancellationTokenSource(jsonRpcConfig.Timeout).Token;
 			var blockTracer = new MyBlockTracer(cancellationToken);
@@ -53,7 +53,7 @@ namespace Zoltu.Nethermind.Plugin.Multicall
 
 			public void ReportReward(Address author, String rewardType, UInt256 rewardValue) { }
 			public void StartNewBlockTrace(Block block) => results.Clear();
-			public ITxTracer StartNewTxTrace(Keccak txHash) => new CancellationTxTracer(txTracer = new CallOutputTracer(), cancellationToken);
+			public ITxTracer StartNewTxTrace(Keccak? txHash) => new CancellationTxTracer(txTracer = new CallOutputTracer(), cancellationToken);
 			public void EndTxTrace()
 			{
 				if (txTracer == null) return;
