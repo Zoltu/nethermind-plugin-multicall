@@ -5,7 +5,7 @@ using Nethermind.JsonRpc.Modules;
 
 namespace Zoltu.Nethermind.Plugin.Multicall
 {
-	[RpcModule(ModuleType.Eth)]
+	[RpcModule((ModuleType)100)]
 	public interface IMulticallModule : IModule
 	{
 		[JsonRpcMethod(IsImplemented = true, Description = "Executes all calls and returns true if they all succeeded, false if any failed.", IsSharable = false)]
