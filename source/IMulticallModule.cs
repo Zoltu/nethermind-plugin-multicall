@@ -8,7 +8,7 @@ namespace Zoltu.Nethermind.Plugin.Multicall
 	[RpcModule((ModuleType)100)]
 	public interface IMulticallModule : IModule
 	{
-		[JsonRpcMethod(IsImplemented = true, Description = "Executes all calls and returns true if they all succeeded, false if any failed.", IsSharable = false)]
+		[JsonRpcMethod(IsImplemented = true, Description = "Executes all calls and returns true if they all succeeded, false if any failed.", IsSharable = false, Availability = RpcEndpoint.All)]
 		ResultWrapper<CallResult[]> eth_multicall(TransactionForRpc[] transactions);
 		public struct CallResult
 		{
