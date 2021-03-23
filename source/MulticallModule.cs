@@ -1,6 +1,6 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using Nethermind.Blockchain;
@@ -41,8 +41,7 @@ namespace Zoltu.Nethermind.Plugin.Multicall
 			public Boolean IsTracingRewards => false;
 
 			private CallOutputTracer? txTracer;
-			// TODO: figure out if this needs to be concurrency safe, or if it can just be a List
-			private readonly ConcurrentStack<CallResult> results = new();
+			private ImmutableArray<CallResult> results = ImmutableArray<CallResult>.Empty;
 			public CallResult[] Results => results.ToArray();
 			private readonly CancellationToken cancellationToken;
 
@@ -58,7 +57,7 @@ namespace Zoltu.Nethermind.Plugin.Multicall
 			{
 				if (txTracer == null) return;
 				var callResult = new CallResult() { StatusCode = txTracer.StatusCode, GasSpent = txTracer.GasSpent, ReturnValue = txTracer.ReturnValue, Error = txTracer.Error };
-				results.Push(callResult);
+				results = results.Add(callResult);
 				txTracer = null;
 			}
 		}
