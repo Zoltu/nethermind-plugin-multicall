@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Nethermind.Api;
 using Nethermind.Api.Extensions;
 using Nethermind.Blockchain;
+using Nethermind.Db;
 using Nethermind.JsonRpc;
 using Nethermind.JsonRpc.Modules;
 using Nethermind.Logging;
@@ -33,7 +34,7 @@ namespace Zoltu.Nethermind.Plugin.Multicall
 			// if any of these aren null something is very wrong, fail hard and fast
 			if (_nethermindApi == null || _logger == null || _config == null) throw new Exception($"InitRpcModules called on {Name} plugin before Init was called.");
 			var jsonRpcConfig = _nethermindApi.Config<IJsonRpcConfig>() ?? throw new Exception($"JsonRpc configuration not found.");
-			var dbProvider = _nethermindApi.DbProvider ?? throw new Exception($"api.DbProvider is null.");
+			var dbProvider = _nethermindApi.DbProvider?.AsReadOnly(false) ?? throw new Exception($"api.DbProvider is null.");
 			var blockTree = _nethermindApi.BlockTree?.AsReadOnly() ?? throw new Exception($"api.BlockTree is null.");
 			var trieNodeResolver = _nethermindApi.ReadOnlyTrieStore ?? throw new Exception($"api.ReadOnlyTrieStore is null.");
 			var recoveryStep = _nethermindApi.BlockPreprocessor ?? throw new Exception($"api.BlockPreprocessor is null.");
