@@ -1,10 +1,10 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using Nethermind.Blockchain;
 using Nethermind.Blockchain.Processing;
+using Nethermind.Blockchain.Tracing;
 using Nethermind.Core;
 using Nethermind.Core.Crypto;
 using Nethermind.Evm.Tracing;
@@ -17,22 +17,23 @@ namespace Zoltu.Nethermind.Plugin.Multicall
 {
 	public sealed class MulticallModule : IMulticallModule
 	{
-		private readonly IBlockProcessor blockProcessor;
 		private readonly IBlockTree blockTree;
 		private readonly IJsonRpcConfig jsonRpcConfig;
-		public MulticallModule(IBlockProcessor blockProcessor, IBlockTree blockTree, IJsonRpcConfig jsonRpcConfig)
+		private readonly ITracer tracer;
+		public MulticallModule(ITracer tracer, IBlockTree blockTree, IJsonRpcConfig jsonRpcConfig)
 		{
-			this.blockProcessor = blockProcessor;
+			this.tracer = tracer;
 			this.blockTree = blockTree;
 			this.jsonRpcConfig = jsonRpcConfig;
 		}
 		public ResultWrapper<CallResult[]> eth_multicall(TransactionForRpc[] transactions)
 		{
-			var blockHeader = new BlockHeader(blockTree.Head!.Hash!, Keccak.EmptyTreeHash, Address.Zero, blockTree.Head.Difficulty, blockTree.Head.Number + 1, blockTree.Head.GasLimit, blockTree.Head.Timestamp + 1, Array.Empty<Byte>());
+			var headBlock = blockTree.Head!;
+			var blockHeader = new BlockHeader(headBlock.Hash!, Keccak.EmptyTreeHash, Address.Zero, headBlock.Difficulty, headBlock.Number + 1, headBlock.GasLimit, headBlock.Timestamp + 1, Array.Empty<Byte>());
 			var block = new Block(blockHeader, transactions.Select(x => x.ToTransaction()), Enumerable.Empty<BlockHeader>());
 			var cancellationToken = new CancellationTokenSource(jsonRpcConfig.Timeout).Token;
 			var blockTracer = new MyBlockTracer(cancellationToken);
-			_ = blockProcessor.Process(blockTree.Head.StateRoot!, new List<Block> { block }, ProcessingOptions.NoValidation | ProcessingOptions.ReadOnlyChain, new CancellationBlockTracer(blockTracer, cancellationToken));
+			var postTraceStateRoot = this.tracer.Trace(block, blockTracer);
 			return ResultWrapper<CallResult[]>.Success(blockTracer.Results.ToArray());
 		}
 
