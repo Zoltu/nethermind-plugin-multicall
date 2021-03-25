@@ -28,7 +28,7 @@ namespace Zoltu.Nethermind.Plugin.Multicall
 		public ResultWrapper<CallResult[]> eth_multicall(TransactionForRpc[] transactions)
 		{
 			var headBlock = blockTree.Head!;
-			var blockHeader = new BlockHeader(headBlock.Hash!, Keccak.EmptyTreeHash, Address.Zero, headBlock.Difficulty, headBlock.Number + 1, headBlock.GasLimit, headBlock.Timestamp + 1, Array.Empty<Byte>());
+			var blockHeader = new BlockHeader(headBlock.Hash!, Keccak.EmptyTreeHash, Address.Zero, headBlock.Difficulty, headBlock.Number + 1, headBlock.GasLimit, headBlock.Timestamp + 1, Array.Empty<Byte>()) { TotalDifficulty = headBlock.TotalDifficulty + headBlock.Difficulty };
 			var block = new Block(blockHeader, transactions.Select(x => x.ToTransaction()), Enumerable.Empty<BlockHeader>());
 			var cancellationToken = new CancellationTokenSource(jsonRpcConfig.Timeout).Token;
 			var blockTracer = new MyBlockTracer(cancellationToken);
