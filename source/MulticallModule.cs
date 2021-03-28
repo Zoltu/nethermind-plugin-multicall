@@ -18,17 +18,19 @@ namespace Zoltu.Nethermind.Plugin.Multicall
 	{
 		private readonly IBlockTree blockTree;
 		private readonly IJsonRpcConfig jsonRpcConfig;
+		private readonly Address blockProducer;
 		private readonly ITracer tracer;
-		public MulticallModule(ITracer tracer, IBlockTree blockTree, IJsonRpcConfig jsonRpcConfig)
+		public MulticallModule(ITracer tracer, IBlockTree blockTree, IJsonRpcConfig jsonRpcConfig, Address blockProducer)
 		{
 			this.tracer = tracer;
 			this.blockTree = blockTree;
 			this.jsonRpcConfig = jsonRpcConfig;
+			this.blockProducer = blockProducer;
 		}
 		public ResultWrapper<CallResult[]> eth_multicall(TransactionForRpc[] transactions)
 		{
 			var headBlock = blockTree.Head!;
-			var blockHeader = new BlockHeader(headBlock.Hash!, Keccak.EmptyTreeHash, Address.Zero, headBlock.Difficulty, headBlock.Number + 1, headBlock.GasLimit, headBlock.Timestamp + 1, Array.Empty<Byte>()) { TotalDifficulty = headBlock.TotalDifficulty + headBlock.Difficulty };
+			var blockHeader = new BlockHeader(headBlock.Hash!, Keccak.EmptyTreeHash, blockProducer, headBlock.Difficulty, headBlock.Number + 1, headBlock.GasLimit, headBlock.Timestamp + 1, Array.Empty<Byte>()) { TotalDifficulty = headBlock.TotalDifficulty + headBlock.Difficulty };
 			var block = new Block(blockHeader, transactions.Select(x => x.ToTransaction()), Enumerable.Empty<BlockHeader>());
 			var cancellationToken = new CancellationTokenSource(jsonRpcConfig.Timeout).Token;
 			var blockTracer = new MyBlockTracer(cancellationToken);
