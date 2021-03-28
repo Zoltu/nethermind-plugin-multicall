@@ -44,13 +44,12 @@ namespace Zoltu.Nethermind.Plugin.Multicall
 			var specProvider = _nethermindApi.SpecProvider ?? throw new Exception($"api.SpecProvider is null.");
 			var logManager = _nethermindApi.LogManager ?? throw new Exception($"api.LogManager is null.");
 			var rpcModuleProvider = _nethermindApi.RpcModuleProvider ?? throw new Exception($"api.RpcModuleProvider is null.");
-			var blockProducer = new Address(_config.BlockProducer);
 
 			try
 			{
 				if (_config.Enabled == false) throw new Exception($"{Name}.Enabled configuration variables set to false, halting initialization of {Name} plugin.");
 				_logger.Info($"{Name} Plugin enabled, initializing...");
-				var multiCallModuleFactory = new MulticallModuleFactory(dbProvider, blockTree, jsonRpcConfig, trieNodeResolver, recoveryStep, rewardCalculatorSource, receiptFinder, specProvider, logManager, blockProducer);
+				var multiCallModuleFactory = new MulticallModuleFactory(dbProvider, blockTree, jsonRpcConfig, trieNodeResolver, recoveryStep, rewardCalculatorSource, receiptFinder, specProvider, logManager);
 				rpcModuleProvider.RegisterBoundedByCpuCount(multiCallModuleFactory, jsonRpcConfig.Timeout);
 				await Task.CompletedTask;
 			}
