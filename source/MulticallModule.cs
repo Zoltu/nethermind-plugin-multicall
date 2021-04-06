@@ -25,10 +25,12 @@ namespace Zoltu.Nethermind.Plugin.Multicall
 			this.blockTree = blockTree;
 			this.jsonRpcConfig = jsonRpcConfig;
 		}
-		public ResultWrapper<CallResult[]> eth_multicall(String blockProducer, TransactionForRpc[] transactions)
+
+		public ResultWrapper<CallResult[]> eth_multicall(Int64 blockNumber, String blockProducer, TransactionForRpc[] transactions)
 		{
-			var headBlock = blockTree.Head!;
-			var blockHeader = new BlockHeader(headBlock.Hash!, Keccak.EmptyTreeHash, new Address(blockProducer), headBlock.Difficulty, headBlock.Number + 1, headBlock.GasLimit, headBlock.Timestamp + 1, Array.Empty<Byte>()) { TotalDifficulty = headBlock.TotalDifficulty + headBlock.Difficulty };
+			var parentBlock = blockTree.FindBlock(blockNumber - 1);
+			if (parentBlock == null) return ResultWrapper<CallResult[]>.Fail($"Unable to find block number {blockNumber}.");
+			var blockHeader = new BlockHeader(parentBlock.Hash!, Keccak.EmptyTreeHash, new Address(blockProducer), parentBlock.Difficulty, parentBlock.Number + 1, parentBlock.GasLimit, parentBlock.Timestamp + 1, Array.Empty<Byte>()) { TotalDifficulty = parentBlock.TotalDifficulty + parentBlock.Difficulty };
 			var block = new Block(blockHeader, transactions.Select(x => x.ToTransaction()), Enumerable.Empty<BlockHeader>());
 			var cancellationToken = new CancellationTokenSource(jsonRpcConfig.Timeout).Token;
 			var blockTracer = new MyBlockTracer(cancellationToken);

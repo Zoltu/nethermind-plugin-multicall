@@ -9,7 +9,7 @@ namespace Zoltu.Nethermind.Plugin.Multicall
 	public interface IMulticallModule : IModule
 	{
 		[JsonRpcMethod(IsImplemented = true, Description = "Executes all calls and returns true if they all succeeded, false if any failed.", IsSharable = false, Availability = RpcEndpoint.All)]
-		ResultWrapper<CallResult[]> eth_multicall(String blockProducer, TransactionForRpc[] transactions);
+		ResultWrapper<CallResult[]> eth_multicall(Int64 blockNumber, String blockProducer, TransactionForRpc[] transactions);
 		public struct CallResult
 		{
 			public Byte StatusCode { get; set; }
