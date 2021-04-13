@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Nethermind.Api;
 using Nethermind.Api.Extensions;
 using Nethermind.Blockchain;
-using Nethermind.Core;
 using Nethermind.Db;
 using Nethermind.JsonRpc;
 using Nethermind.JsonRpc.Modules;

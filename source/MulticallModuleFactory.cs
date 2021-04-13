@@ -4,7 +4,6 @@ using Nethermind.Blockchain.Receipts;
 using Nethermind.Blockchain.Rewards;
 using Nethermind.Blockchain.Tracing;
 using Nethermind.Blockchain.Validators;
-using Nethermind.Core;
 using Nethermind.Core.Specs;
 using Nethermind.Db;
 using Nethermind.JsonRpc;
@@ -18,8 +17,6 @@ namespace Zoltu.Nethermind.Plugin.Multicall
 	{
 		private readonly ReadOnlyDbProvider dbProvider;
 		private readonly IBlockTree blockTree;
-		private readonly IDbProvider dbProvider1;
-		private readonly IBlockTree blockTree1;
 		private readonly IJsonRpcConfig jsonRpcConfig;
 		private readonly IReadOnlyTrieStore trieNodeResolver;
 		private readonly IBlockPreprocessorStep recoveryStep;
@@ -32,8 +29,6 @@ namespace Zoltu.Nethermind.Plugin.Multicall
 		{
 			this.dbProvider = dbProvider.AsReadOnly(false);
 			this.blockTree = blockTree.AsReadOnly();
-			dbProvider1 = dbProvider;
-			blockTree1 = blockTree;
 			this.jsonRpcConfig = jsonRpcConfig;
 			this.trieNodeResolver = trieNodeResolver;
 			this.recoveryStep = recoveryStep;
