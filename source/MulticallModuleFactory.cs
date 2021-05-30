@@ -1,14 +1,20 @@
+using System;
 using Nethermind.Blockchain;
 using Nethermind.Blockchain.Processing;
 using Nethermind.Blockchain.Receipts;
 using Nethermind.Blockchain.Rewards;
 using Nethermind.Blockchain.Tracing;
 using Nethermind.Blockchain.Validators;
+using Nethermind.Core;
+using Nethermind.Core.Crypto;
 using Nethermind.Core.Specs;
 using Nethermind.Db;
+using Nethermind.Evm.Tracing;
 using Nethermind.JsonRpc;
 using Nethermind.JsonRpc.Modules;
 using Nethermind.Logging;
+using Nethermind.State;
+using Nethermind.Trie;
 using Nethermind.Trie.Pruning;
 
 namespace Zoltu.Nethermind.Plugin.Multicall
@@ -44,6 +50,46 @@ namespace Zoltu.Nethermind.Plugin.Multicall
 			var chainProcessingEnv = new ReadOnlyChainProcessingEnv(txProcessingEnv, Always.Valid, recoveryStep, rewardCalculator, receiptFinder, dbProvider, specProvider, logManager);
 			var tracer = new Tracer(chainProcessingEnv.StateProvider, chainProcessingEnv.ChainProcessor);
 			return new MulticallModule(tracer, blockTree, jsonRpcConfig);
+		}
+	}
+
+	// ripped from Nethermind codebase so we can enable nonce checking, since processing options isn't exposed
+	public class Tracer : ITracer
+	{
+		private readonly IStateProvider _stateProvider;
+		private readonly IBlockchainProcessor _blockProcessor;
+
+		public Tracer(IStateProvider stateProvider, IBlockchainProcessor blockProcessor)
+		{
+			_stateProvider = stateProvider ?? throw new ArgumentNullException(nameof(stateProvider));
+			_blockProcessor = blockProcessor ?? throw new ArgumentNullException(nameof(blockProcessor));
+		}
+
+		public Keccak Trace(Block block, IBlockTracer blockTracer)
+		{
+			/* We force process since we want to process a block that has already been processed in the past and normally it would be ignored.
+				We also want to make it read only so the state is not modified persistently in any way. */
+			blockTracer.StartNewBlockTrace(block);
+
+			try
+			{
+				_ = _blockProcessor.Process(block, ProcessingOptions.ForceProcessing | ProcessingOptions.ReadOnlyChain | ProcessingOptions.NoValidation, blockTracer);
+			}
+			catch (Exception)
+			{
+				_stateProvider.Reset();
+				throw;
+			}
+
+			return _stateProvider.StateRoot;
+		}
+
+		public void Accept(ITreeVisitor visitor, Keccak stateRoot)
+		{
+			if (visitor == null) throw new ArgumentNullException(nameof(visitor));
+			if (stateRoot == null) throw new ArgumentNullException(nameof(stateRoot));
+
+			_stateProvider.Accept(visitor, stateRoot);
 		}
 	}
 }
