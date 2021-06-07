@@ -48,18 +48,18 @@ namespace Zoltu.Nethermind.Plugin.Multicall
 			var txProcessingEnv = new ReadOnlyTxProcessingEnv(dbProvider, trieNodeResolver, blockTree, specProvider, logManager);
 			var rewardCalculator = rewardCalculatorSource.Get(txProcessingEnv.TransactionProcessor);
 			var chainProcessingEnv = new ReadOnlyChainProcessingEnv(txProcessingEnv, Always.Valid, recoveryStep, rewardCalculator, receiptFinder, dbProvider, specProvider, logManager);
-			var tracer = new Tracer(chainProcessingEnv.StateProvider, chainProcessingEnv.ChainProcessor);
+			var tracer = new MyTracer(chainProcessingEnv.StateProvider, chainProcessingEnv.ChainProcessor);
 			return new MulticallModule(tracer, blockTree, jsonRpcConfig);
 		}
 	}
 
 	// ripped from Nethermind codebase so we can enable nonce checking, since processing options isn't exposed
-	public class Tracer : ITracer
+	public class MyTracer : ITracer
 	{
 		private readonly IStateProvider _stateProvider;
 		private readonly IBlockchainProcessor _blockProcessor;
 
-		public Tracer(IStateProvider stateProvider, IBlockchainProcessor blockProcessor)
+		public MyTracer(IStateProvider stateProvider, IBlockchainProcessor blockProcessor)
 		{
 			_stateProvider = stateProvider ?? throw new ArgumentNullException(nameof(stateProvider));
 			_blockProcessor = blockProcessor ?? throw new ArgumentNullException(nameof(blockProcessor));
