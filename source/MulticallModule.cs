@@ -55,7 +55,7 @@ namespace Zoltu.Nethermind.Plugin.Multicall
 
 			public void ReportReward(Address author, String rewardType, UInt256 rewardValue) { }
 			public void StartNewBlockTrace(Block block) => results.Clear();
-			public ITxTracer StartNewTxTrace(Keccak? txHash) => new CancellationTxTracer(txTracer = new CallOutputTracer(), cancellationToken);
+			public ITxTracer StartNewTxTrace(Transaction? tx) => new CancellationTxTracer(txTracer = new CallOutputTracer(), cancellationToken);
 			public void EndTxTrace()
 			{
 				if (txTracer == null) return;
