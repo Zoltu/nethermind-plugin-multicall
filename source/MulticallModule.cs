@@ -63,6 +63,7 @@ namespace Zoltu.Nethermind.Plugin.Multicall
 				results = results.Add(callResult);
 				txTracer = null;
 			}
+			public void EndBlockTrace() { }
 		}
 	}
 }
