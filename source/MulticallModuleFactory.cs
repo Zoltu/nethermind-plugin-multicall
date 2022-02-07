@@ -65,23 +65,22 @@ namespace Zoltu.Nethermind.Plugin.Multicall
 			_blockProcessor = blockProcessor ?? throw new ArgumentNullException(nameof(blockProcessor));
 		}
 
-		public Keccak Trace(Block block, IBlockTracer blockTracer)
+		public Block? Trace(Block block, IBlockTracer blockTracer)
 		{
-			/* We force process since we want to process a block that has already been processed in the past and normally it would be ignored.
-				We also want to make it read only so the state is not modified persistently in any way. */
-			blockTracer.StartNewBlockTrace(block);
-
 			try
 			{
-				_ = _blockProcessor.Process(block, ProcessingOptions.ForceProcessing | ProcessingOptions.ReadOnlyChain | ProcessingOptions.NoValidation, blockTracer);
+				blockTracer.StartNewBlockTrace(block);
+				/* We force process since we want to process a block that has already been processed in the past and normally it would be ignored.
+				We also want to make it read only so the state is not modified persistently in any way. */
+				Block? processedBlock = _blockProcessor.Process(block, ProcessingOptions.ForceProcessing | ProcessingOptions.ReadOnlyChain | ProcessingOptions.NoValidation, blockTracer);
+				blockTracer.EndBlockTrace();
+				return processedBlock;
 			}
 			catch (Exception)
 			{
 				_stateProvider.Reset();
 				throw;
 			}
-
-			return _stateProvider.StateRoot;
 		}
 
 		public void Accept(ITreeVisitor visitor, Keccak stateRoot)
