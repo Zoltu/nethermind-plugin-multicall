@@ -43,7 +43,7 @@ namespace Zoltu.Nethermind.Plugin.Multicall
 		{
 			public Boolean IsTracingRewards => false;
 
-			private CallOutputTracer? txTracer;
+			private MulticallTransactionTracer? txTracer;
 			private ImmutableArray<CallResult> results = ImmutableArray<CallResult>.Empty;
 			public CallResult[] Results => results.ToArray();
 			private readonly CancellationToken cancellationToken;
@@ -55,11 +55,19 @@ namespace Zoltu.Nethermind.Plugin.Multicall
 
 			public void ReportReward(Address author, String rewardType, UInt256 rewardValue) { }
 			public void StartNewBlockTrace(Block block) => results.Clear();
-			public ITxTracer StartNewTxTrace(Transaction? tx) => new CancellationTxTracer(txTracer = new CallOutputTracer(), cancellationToken);
+			public ITxTracer StartNewTxTrace(Transaction? tx) => new CancellationTxTracer(txTracer = new MulticallTransactionTracer(), cancellationToken);
 			public void EndTxTrace()
 			{
 				if (txTracer == null) return;
-				var callResult = new CallResult() { StatusCode = txTracer.StatusCode, GasSpent = txTracer.GasSpent, ReturnValue = txTracer.ReturnValue, Error = txTracer.Error };
+				var callResult = new CallResult()
+				{
+					StatusCode = txTracer.StatusCode,
+					GasSpent = txTracer.GasSpent,
+					ReturnValue = txTracer.ReturnValue,
+					Error = txTracer.Error,
+					Events = txTracer.Events,
+					BalanceChanges = txTracer.BalanceChanges,
+				};
 				results = results.Add(callResult);
 				txTracer = null;
 			}
