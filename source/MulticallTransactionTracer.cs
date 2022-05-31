@@ -39,13 +39,13 @@ namespace Zoltu.Nethermind.Plugin.Multicall
 			this.Events = logs.ToImmutableArray();
 		}
 
-        public void MarkAsFailed(Address recipient, long gasSpent, byte[] output, string error, Keccak? stateRoot = null)
-        {
-            this.GasSpent = gasSpent;
-            this.Error = error;
-            this.ReturnValue = output;
-            this.StatusCode = global::Nethermind.Evm.StatusCode.Failure;
-        }
+		public void MarkAsFailed(Address recipient, long gasSpent, byte[] output, string error, Keccak? stateRoot = null)
+		{
+			this.GasSpent = gasSpent;
+			this.Error = error;
+			this.ReturnValue = output;
+			this.StatusCode = global::Nethermind.Evm.StatusCode.Failure;
+		}
 
 		public void ReportBalanceChange(Address address, UInt256? before, UInt256? after)
 		{
