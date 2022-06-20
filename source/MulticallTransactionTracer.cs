@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using Nethermind.Core;
 using Nethermind.Core.Crypto;
-using Nethermind.Int256;
 using Nethermind.Evm;
 using Nethermind.Evm.Tracing;
+using Nethermind.Int256;
 
 namespace Zoltu.Nethermind.Plugin.Multicall
 {
@@ -52,6 +52,7 @@ namespace Zoltu.Nethermind.Plugin.Multicall
 			this.BalanceChanges = this.BalanceChanges.Add(new BalanceChange() { Address = address, Before = before ?? UInt256.Zero, After = after ?? UInt256.Zero });
 		}
 
+		public void StartOperation(Int32 depth, Int64 gas, Instruction opcode, Int32 pc, Boolean isPostMerge = false) { }
 		public void LoadOperationStorage(Address address, UInt256 storageIndex, ReadOnlySpan<byte> value) { }
 		public void ReportAccess(IReadOnlySet<Address> accessedAddresses, IReadOnlySet<StorageCell> accessedStorageCells) { }
 		public void ReportAccountRead(Address address) { }
