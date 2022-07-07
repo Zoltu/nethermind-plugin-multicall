@@ -72,7 +72,7 @@ namespace Zoltu.Nethermind.Plugin.Multicall
 				blockTracer.StartNewBlockTrace(block);
 				/* We force process since we want to process a block that has already been processed in the past and normally it would be ignored.
 				We also want to make it read only so the state is not modified persistently in any way. */
-				Block? processedBlock = _blockProcessor.Process(block, ProcessingOptions.ForceProcessing | ProcessingOptions.ReadOnlyChain | ProcessingOptions.NoValidation, blockTracer);
+				Block? processedBlock = _blockProcessor.Process(block, ProcessingOptions.ProducingBlock, blockTracer);
 				blockTracer.EndBlockTrace();
 				return processedBlock;
 			}
