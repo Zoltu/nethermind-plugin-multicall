@@ -29,7 +29,7 @@ namespace Zoltu.Nethermind.Plugin.Multicall
 		public ResultWrapper<CallResult[]> eth_multicall(Int64 blockNumber, String blockProducer, TransactionForRpc[] transactions)
 		{
 			var parentBlock = blockTree.FindBlock(blockNumber - 1);
-			if (parentBlock == null) return ResultWrapper<CallResult[]>.Fail($"Unable to find block number {blockNumber}.");
+			if (parentBlock == null) return ResultWrapper<CallResult[]>.Fail($"Unable to find block number {blockNumber - 1}.");
 			var blockHeader = new BlockHeader(parentBlock.Hash!, Keccak.EmptyTreeHash, new Address(blockProducer), parentBlock.Difficulty, parentBlock.Number + 1, parentBlock.GasLimit, parentBlock.Timestamp + 1, Array.Empty<Byte>()) { TotalDifficulty = parentBlock.TotalDifficulty + parentBlock.Difficulty };
 			blockHeader.Author = new Address(blockProducer);
 			var block = new Block(blockHeader, transactions.Select(x => x.ToTransaction()), Enumerable.Empty<BlockHeader>());
