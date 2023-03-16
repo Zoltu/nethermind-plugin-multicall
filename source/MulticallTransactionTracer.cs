@@ -23,6 +23,7 @@ namespace Zoltu.Nethermind.Plugin.Multicall
 		public Boolean IsTracingStack => false;
 		public Boolean IsTracingBlockHash => false;
 		public Boolean IsTracingStorage => false;
+		public Boolean IsTracingFees => false;
 
 		public ImmutableList<BalanceChange> BalanceChanges { get; private set; } = ImmutableList<BalanceChange>.Empty;
 		public ImmutableArray<LogEntry> Events { get; private set; } = ImmutableArray<LogEntry>.Empty;
@@ -64,6 +65,7 @@ namespace Zoltu.Nethermind.Plugin.Multicall
 		public void ReportByteCode(Byte[] byteCode) { }
 		public void ReportCodeChange(Address address, Byte[]? before, Byte[]? after) { }
 		public void ReportExtraGasPressure(Int64 extraGasPressure) { }
+		public void ReportFees(UInt256 fees, UInt256 burntFees) { }
 		public void ReportGasUpdateForVmTrace(Int64 refund, Int64 gasAvailable) { }
 		public void ReportMemoryChange(Int64 offset, in ReadOnlySpan<Byte> data) { }
 		public void ReportNonceChange(Address address, UInt256? before, UInt256? after) { }
