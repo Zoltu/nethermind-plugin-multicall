@@ -10,7 +10,7 @@ using Nethermind.Logging;
 
 namespace Zoltu.Nethermind.Plugin.Multicall
 {
-	public sealed class Plugin : DisposeAsyncOnce, INethermindPlugin
+	public sealed class MulticallPlugin : DisposeAsyncOnce, INethermindPlugin
 	{
 		public String Name => "Multicall";
 		public String Description => "Adds support for calling multiple transactions in sequence against shared state.";
@@ -19,11 +19,14 @@ namespace Zoltu.Nethermind.Plugin.Multicall
 		private ILogger? _logger;
 		private IMulticallConfig? _config;
 
+		// Don't remove default constructor. It is used by reflection when we're loading plugins
+		public MulticallPlugin() { }
+
 		public async Task Init(INethermindApi nethermindApi)
 		{
-			_nethermindApi = nethermindApi;
-			_logger = nethermindApi.LogManager.GetClassLogger();
-			_config = nethermindApi.Config<IMulticallConfig>();
+			_nethermindApi = nethermindApi ?? throw new ArgumentNullException(nameof(nethermindApi));
+			_logger = nethermindApi.LogManager.GetClassLogger() ?? throw new ArgumentNullException(nameof(_logger));
+			_config = nethermindApi.Config<IMulticallConfig>() ?? throw new ArgumentNullException(nameof(_config));
 			await Task.CompletedTask;
 		}
 
