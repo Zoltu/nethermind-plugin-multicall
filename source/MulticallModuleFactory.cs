@@ -48,7 +48,7 @@ namespace Zoltu.Nethermind.Plugin.Multicall
 			var txProcessingEnv = new ReadOnlyTxProcessingEnv(dbProvider, trieNodeResolver, blockTree, specProvider, logManager);
 			var rewardCalculator = rewardCalculatorSource.Get(txProcessingEnv.TransactionProcessor);
 			var chainProcessingEnv = new ReadOnlyChainProcessingEnv(txProcessingEnv, Always.Valid, recoveryStep, rewardCalculator, receiptFinder, dbProvider, specProvider, logManager);
-			var tracer = new MyTracer(chainProcessingEnv.StateProvider, chainProcessingEnv.ChainProcessor);
+			var tracer = new MyTracer(chainProcessingEnv.StateProvider, chainProcessingEnv.ChainProcessor, chainProcessingEnv.ChainProcessor);
 			return new MulticallModule(tracer, blockTree, jsonRpcConfig);
 		}
 	}
@@ -56,32 +56,19 @@ namespace Zoltu.Nethermind.Plugin.Multicall
 	// ripped from Nethermind codebase so we can enable nonce checking, since processing options isn't exposed
 	public class MyTracer : ITracer
 	{
-		private readonly IStateProvider _stateProvider;
-		private readonly IBlockchainProcessor _blockProcessor;
+		private readonly IWorldState _stateProvider;
+		private readonly IBlockchainProcessor _traceProcessor;
+		private readonly IBlockchainProcessor _executeProcessor;
 
-		public MyTracer(IStateProvider stateProvider, IBlockchainProcessor blockProcessor)
+		public MyTracer(IWorldState stateProvider, IBlockchainProcessor traceProcessor, IBlockchainProcessor executeProcessor)
 		{
 			_stateProvider = stateProvider ?? throw new ArgumentNullException(nameof(stateProvider));
-			_blockProcessor = blockProcessor ?? throw new ArgumentNullException(nameof(blockProcessor));
+			_traceProcessor = traceProcessor ?? throw new ArgumentNullException(nameof(traceProcessor));
+			_executeProcessor = executeProcessor ?? throw new ArgumentNullException(nameof(executeProcessor));
 		}
 
-		public Block? Trace(Block block, IBlockTracer blockTracer)
-		{
-			try
-			{
-				blockTracer.StartNewBlockTrace(block);
-				/* We force process since we want to process a block that has already been processed in the past and normally it would be ignored.
-				We also want to make it read only so the state is not modified persistently in any way. */
-				Block? processedBlock = _blockProcessor.Process(block, ProcessingOptions.ProducingBlock, blockTracer);
-				blockTracer.EndBlockTrace();
-				return processedBlock;
-			}
-			catch (Exception)
-			{
-				_stateProvider.Reset();
-				throw;
-			}
-		}
+		public void Trace(Block block, IBlockTracer blockTracer) => Process(block, blockTracer, _traceProcessor);
+		public void Execute(Block block, IBlockTracer tracer) => Process(block, tracer, _executeProcessor);
 
 		public void Accept(ITreeVisitor visitor, Keccak stateRoot)
 		{
@@ -89,6 +76,26 @@ namespace Zoltu.Nethermind.Plugin.Multicall
 			if (stateRoot == null) throw new ArgumentNullException(nameof(stateRoot));
 
 			_stateProvider.Accept(visitor, stateRoot);
+		}
+
+		private void Process(Block block, IBlockTracer blockTracer, IBlockchainProcessor processor)
+		{
+			/* We force process since we want to process a block that has already been processed in the past and normally it would be ignored.
+			We also want to make it read only so the state is not modified persistently in any way. */
+
+			blockTracer.StartNewBlockTrace(block);
+
+			try
+			{
+				processor.Process(block, ProcessingOptions.ProducingBlock, blockTracer);
+			}
+			catch (Exception)
+			{
+				_stateProvider.Reset();
+				throw;
+			}
+
+			blockTracer.EndBlockTrace();
 		}
 	}
 }

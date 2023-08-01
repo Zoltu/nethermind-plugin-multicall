@@ -35,7 +35,7 @@ namespace Zoltu.Nethermind.Plugin.Multicall
 			var block = new Block(blockHeader, transactions.Select(x => x.ToTransaction()), Enumerable.Empty<BlockHeader>());
 			var cancellationToken = new CancellationTokenSource(jsonRpcConfig.Timeout).Token;
 			var blockTracer = new MyBlockTracer(cancellationToken);
-			var postTraceStateRoot = this.tracer.Trace(block, blockTracer);
+			this.tracer.Trace(block, blockTracer);
 			return ResultWrapper<CallResult[]>.Success(blockTracer.Results.ToArray());
 		}
 

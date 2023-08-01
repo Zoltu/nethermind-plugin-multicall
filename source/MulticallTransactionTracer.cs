@@ -11,6 +11,7 @@ namespace Zoltu.Nethermind.Plugin.Multicall
 {
 	public sealed class MulticallTransactionTracer : ITxTracer
 	{
+		public Boolean IsTracing => true;
 		public Boolean IsTracingReceipt => true;
 		public Boolean IsTracingState => true;
 		public Boolean IsTracingAccess => false;
@@ -75,8 +76,8 @@ namespace Zoltu.Nethermind.Plugin.Multicall
 		public void ReportSelfDestruct(Address address, UInt256 balance, Address refundAddress) { }
 		public void ReportStackPush(in ReadOnlySpan<Byte> stackItem) { }
 		public void ReportStorageChange(in ReadOnlySpan<Byte> key, in ReadOnlySpan<Byte> value) { }
-		public void ReportStorageChange(StorageCell storageCell, Byte[] before, Byte[] after) { }
-		public void ReportStorageRead(StorageCell storageCell) { }
+		public void ReportStorageChange(in StorageCell storageCell, Byte[] before, Byte[] after) { }
+		public void ReportStorageRead(in StorageCell storageCell) { }
 		public void SetOperationMemory(List<String> memoryTrace) { }
 		public void SetOperationMemorySize(UInt64 newSize) { }
 		public void SetOperationStack(List<String> stackTrace) { }
