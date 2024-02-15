@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFramework>net7.0</TargetFramework>
+		<TargetFramework>net8.0</TargetFramework>
 		<LangVersion>9.0</LangVersion>
 		<Nullable>enable</Nullable>
 		<Deterministic>true</Deterministic>
@@ -14,7 +14,7 @@
 		<FrameworkReference Include="Microsoft.AspNetCore.App" />
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="Nethermind.Numerics.Int256" Version="1.1.0" />
-		<PackageReference Include="Nethermind.ReferenceAssemblies" Version="1.20.1" />
+		<PackageReference Include="Nethermind.Numerics.Int256" Version="1.2.0" />
+		<PackageReference Include="Nethermind.ReferenceAssemblies" Version="1.25.3" />
 	</ItemGroup>
 </Project>

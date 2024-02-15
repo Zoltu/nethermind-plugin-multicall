@@ -1,5 +1,4 @@
-# FROM mcr.microsoft.com/dotnet/sdk:7.0 as builder
-FROM mcr.microsoft.com/dotnet/sdk@sha256:e049e6a153619337ceb4edd040fb60a220d420414d41d6eb39708d6ce390bc7c as builder
+FROM mcr.microsoft.com/dotnet/sdk:8.0@sha256:b246fc9a92feefe3aff49beb165fda4fc5a29122cd30768bafdc2d3e606c565c as builder
 COPY source/ /build/source
 COPY *.csproj /build/
 WORKDIR /build

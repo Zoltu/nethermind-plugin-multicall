@@ -21,22 +21,20 @@ namespace Zoltu.Nethermind.Plugin.Multicall
 {
 	public sealed class MulticallModuleFactory : ModuleFactoryBase<IMulticallModule>
 	{
-		private readonly ReadOnlyDbProvider dbProvider;
+		private readonly IWorldStateManager worldStateManager;
 		private readonly IBlockTree blockTree;
 		private readonly IJsonRpcConfig jsonRpcConfig;
-		private readonly IReadOnlyTrieStore trieNodeResolver;
 		private readonly IBlockPreprocessorStep recoveryStep;
 		private readonly IRewardCalculatorSource rewardCalculatorSource;
 		private readonly IReceiptStorage receiptFinder;
 		private readonly ISpecProvider specProvider;
 		private readonly ILogManager logManager;
 
-		public MulticallModuleFactory(IDbProvider dbProvider, IBlockTree blockTree, IJsonRpcConfig jsonRpcConfig, IReadOnlyTrieStore trieNodeResolver, IBlockPreprocessorStep recoveryStep, IRewardCalculatorSource rewardCalculatorSource, IReceiptStorage receiptFinder, ISpecProvider specProvider, ILogManager logManager)
+		public MulticallModuleFactory(IWorldStateManager worldStateManager, IBlockTree blockTree, IJsonRpcConfig jsonRpcConfig, IBlockPreprocessorStep recoveryStep, IRewardCalculatorSource rewardCalculatorSource, IReceiptStorage receiptFinder, ISpecProvider specProvider, ILogManager logManager)
 		{
-			this.dbProvider = dbProvider.AsReadOnly(false);
+			this.worldStateManager = worldStateManager;
 			this.blockTree = blockTree.AsReadOnly();
 			this.jsonRpcConfig = jsonRpcConfig;
-			this.trieNodeResolver = trieNodeResolver;
 			this.recoveryStep = recoveryStep;
 			this.rewardCalculatorSource = rewardCalculatorSource;
 			this.receiptFinder = receiptFinder;
@@ -45,9 +43,9 @@ namespace Zoltu.Nethermind.Plugin.Multicall
 		}
 		public override IMulticallModule Create()
 		{
-			var txProcessingEnv = new ReadOnlyTxProcessingEnv(dbProvider, trieNodeResolver, blockTree, specProvider, logManager);
+			var txProcessingEnv = new ReadOnlyTxProcessingEnv(worldStateManager, blockTree, specProvider, logManager);
 			var rewardCalculator = rewardCalculatorSource.Get(txProcessingEnv.TransactionProcessor);
-			var chainProcessingEnv = new ReadOnlyChainProcessingEnv(txProcessingEnv, Always.Valid, recoveryStep, rewardCalculator, receiptFinder, dbProvider, specProvider, logManager);
+			var chainProcessingEnv = new ReadOnlyChainProcessingEnv(txProcessingEnv, Always.Valid, recoveryStep, rewardCalculator, receiptFinder, specProvider, logManager);
 			var tracer = new MyTracer(chainProcessingEnv.StateProvider, chainProcessingEnv.ChainProcessor, chainProcessingEnv.ChainProcessor);
 			return new MulticallModule(tracer, blockTree, jsonRpcConfig);
 		}
@@ -70,7 +68,7 @@ namespace Zoltu.Nethermind.Plugin.Multicall
 		public void Trace(Block block, IBlockTracer blockTracer) => Process(block, blockTracer, _traceProcessor);
 		public void Execute(Block block, IBlockTracer tracer) => Process(block, tracer, _executeProcessor);
 
-		public void Accept(ITreeVisitor visitor, Keccak stateRoot)
+		public void Accept(ITreeVisitor visitor, Hash256 stateRoot)
 		{
 			if (visitor == null) throw new ArgumentNullException(nameof(visitor));
 			if (stateRoot == null) throw new ArgumentNullException(nameof(stateRoot));

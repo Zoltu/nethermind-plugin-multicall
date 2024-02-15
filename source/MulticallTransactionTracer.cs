@@ -33,7 +33,7 @@ namespace Zoltu.Nethermind.Plugin.Multicall
 		public String? Error { get; private set; }
 		public Byte StatusCode { get; private set; }
 
-		public void MarkAsSuccess(Address recipient, long gasSpent, byte[] output, LogEntry[] logs, Keccak? stateRoot = null)
+		public void MarkAsSuccess(Address recipient, long gasSpent, byte[] output, LogEntry[] logs, Hash256? stateRoot = null)
 		{
 			this.GasSpent = gasSpent;
 			this.ReturnValue = output;
@@ -41,7 +41,7 @@ namespace Zoltu.Nethermind.Plugin.Multicall
 			this.Events = logs.ToImmutableArray();
 		}
 
-		public void MarkAsFailed(Address recipient, long gasSpent, byte[] output, string error, Keccak? stateRoot = null)
+		public void MarkAsFailed(Address recipient, long gasSpent, byte[] output, string error, Hash256? stateRoot = null)
 		{
 			this.GasSpent = gasSpent;
 			this.Error = error;
@@ -62,7 +62,7 @@ namespace Zoltu.Nethermind.Plugin.Multicall
 		public void ReportActionEnd(Int64 gas, ReadOnlyMemory<Byte> output) { }
 		public void ReportActionEnd(Int64 gas, Address deploymentAddress, ReadOnlyMemory<Byte> deployedCode) { }
 		public void ReportActionError(EvmExceptionType evmExceptionType) { }
-		public void ReportBlockHash(Keccak blockHash) { }
+		public void ReportBlockHash(Hash256 blockHash) { }
 		public void ReportByteCode(Byte[] byteCode) { }
 		public void ReportCodeChange(Address address, Byte[]? before, Byte[]? after) { }
 		public void ReportExtraGasPressure(Int64 extraGasPressure) { }
@@ -83,5 +83,8 @@ namespace Zoltu.Nethermind.Plugin.Multicall
 		public void SetOperationStack(List<String> stackTrace) { }
 		public void SetOperationStorage(Address address, UInt256 storageIndex, ReadOnlySpan<Byte> newValue, ReadOnlySpan<Byte> currentValue) { }
 		public void StartOperation(Int32 depth, Int64 gas, Instruction opcode, Int32 pc) { }
+		public void SetOperationStack(TraceStack stack) { }
+		public void SetOperationMemory(TraceMemory memoryTrace) { }
+		public void Dispose() { }
 	}
 }

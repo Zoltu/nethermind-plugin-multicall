@@ -37,9 +37,8 @@ namespace Zoltu.Nethermind.Plugin.Multicall
 			// if any of these aren null something is very wrong, fail hard and fast
 			if (_nethermindApi == null || _logger == null || _config == null) throw new Exception($"InitRpcModules called on {Name} plugin before Init was called.");
 			var jsonRpcConfig = _nethermindApi.Config<IJsonRpcConfig>() ?? throw new Exception($"JsonRpc configuration not found.");
-			var dbProvider = _nethermindApi.DbProvider?.AsReadOnly(false) ?? throw new Exception($"api.DbProvider is null.");
+			var worldStateManager = _nethermindApi.WorldStateManager ?? throw new Exception($"api.worldStateManager is null.");
 			var blockTree = _nethermindApi.BlockTree?.AsReadOnly() ?? throw new Exception($"api.BlockTree is null.");
-			var trieNodeResolver = _nethermindApi.ReadOnlyTrieStore ?? throw new Exception($"api.ReadOnlyTrieStore is null.");
 			var recoveryStep = _nethermindApi.BlockPreprocessor ?? throw new Exception($"api.BlockPreprocessor is null.");
 			var rewardCalculatorSource = _nethermindApi.RewardCalculatorSource ?? throw new Exception($"api.RewardCalculatorSource is null.");
 			var receiptFinder = _nethermindApi.ReceiptStorage ?? throw new Exception($"api.ReceiptStorage is null.");
@@ -51,7 +50,7 @@ namespace Zoltu.Nethermind.Plugin.Multicall
 			{
 				if (_config.Enabled == false) throw new Exception($"{Name}.Enabled configuration variables set to false, halting initialization of {Name} plugin.");
 				_logger.Info($"{Name} Plugin enabled, initializing...");
-				var multiCallModuleFactory = new MulticallModuleFactory(dbProvider, blockTree, jsonRpcConfig, trieNodeResolver, recoveryStep, rewardCalculatorSource, receiptFinder, specProvider, logManager);
+				var multiCallModuleFactory = new MulticallModuleFactory(worldStateManager, blockTree, jsonRpcConfig, recoveryStep, rewardCalculatorSource, receiptFinder, specProvider, logManager);
 				rpcModuleProvider.RegisterBoundedByCpuCount(multiCallModuleFactory, jsonRpcConfig.Timeout);
 				await Task.CompletedTask;
 			}
